@@ -33,15 +33,15 @@ export default function TripStatistics({ trip, realSpeed }) {
                     </p>
                     <p>
                         <span className='cloumn_name'>Total distance:</span> 
-                        <span className='cloumn_content'>{trip.distance} Km</span>
+                        <span className='cloumn_content'>{trip.distance} m</span>
                     </p>
                     <p>
                         <span className='cloumn_name'>Total elevation gain:</span>
-                        <span className='cloumn_content'>{trip.elevationGain}</span>
+                        <span className='cloumn_content'>{trip.elevationGain.toFixed(1)}</span>
                     </p>
                     <p>
                         <span className='cloumn_name'>Total scores:</span>
-                        <span className='cloumn_content'>{trip.scores}</span>
+                        <span className='cloumn_content'>{trip.scores.toFixed(1)}</span>
                     </p>
                 </>
             }
