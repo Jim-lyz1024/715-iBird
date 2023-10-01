@@ -1,0 +1,223 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+.Margin_box,.Challenges_box,.Bird_Box,.Trip_option_box,.floatingpanel_box,.Profile_text_box{
+    padding: 2rem;
+}
+
+.Form_box p{
+    margin-bottom: 1rem;
+}
+.Form_box p label{
+    display: block;
+    font-weight: bold;
+}
+.Form_box p input{
+    padding: 9px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 4px;
+}
+.Form_box .button_box{
+    margin-top: 3rem;
+    display: flex;
+    justify-content: center;
+}
+.Form_box .button_box .login_button{
+    width: 70%;
+}
+
+.Login_text_box{
+    text-align: center;
+    margin-bottom: 4rem;
+}
+.Login_text_box p{
+    margin-top: 1rem;
+    color: #8f8f8f;
+}
+
+.Tips_box{
+    text-align: center;
+    margin-top: 4rem;
+    color: #8f8f8f;
+}
+.Tips_box a{
+    color: #8f8f8f;
+    font-weight: bold;
+}
+
+.navBar{
+    background-color: #2196F3;
+    color: white;
+}
+
+.Text_column_box{
+
+}
+.Text_column_box p,.ma_tb{
+    margin-bottom: 5px;
+}
+.Text_column_box p .cloumn_name{
+    width: 40%;
+    display: inline-block;
+    font-weight: bold;
+}
+.Text_column_box p .cloumn_content{
+    width: 60%;
+    display: inline-block;
+    text-align: right;
+    color:  #8f8f8f;
+}
+.ma_tp{
+    margin-top: 10px;
+}
+
+.Kiwi_box{
+    margin-top: 9vh;
+}
+.Kiwi_box .medal_box{
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.Kiwi_box .medal_box img{
+    height: 200px;
+    width: 200px;
+    border-radius: 100px;
+}
+.Kiwi_box .row{
+    width: 100%;
+    text-align: center;
+}
+.Kiwi_box .row .cloumn {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.Kiwi_box .row .cloumn .cloumn_name{
+    width: 80%;
+    text-align: left;
+    font-weight: bolder;
+}
+.Kiwi_box .row .cloumn .cloumn_progress{
+    width: 80%;
+}
+.Kiwi_box .row .cloumn_button{
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+}
+.Kiwi_box .row .cloumn_button Button{
+    width: 40%;
+}
+
+.challengeCard{
+    display: inline-block;
+    margin: 10px;
+    padding: 2px;
+    vertical-align: text-top;
+    text-align: center;
+}
+.challengeCard h2{
+    text-align: left;
+}
+.challengeCard span{
+    display: block;
+    font-weight: bold;
+    width: 50px;
+}
+.Challenges_box .progress_circle{
+    text-align: center;
+    margin-top: 2rem;
+}
+.tx_center_button {
+    text-align: center;
+    margin: 1rem 0rem;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.tx_center_button Button{
+    text-align: center;
+    width: 40%;
+}
+.tx_center_button .searchBar{
+    width: 60%;
+}
+.title{
+    padding: 1rem;
+    font-size: x-large;
+    font-weight: bold;
+}
+.margin_left{
+    margin-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.Trip_option_box{
+    margin-top: 4vh;
+}
+.Round_button{
+    text-align: center;
+    margin-top: 4rem;
+}
+.Round_button button{
+    border: none;
+    background-color: #2196f3;
+    color: white;
+    height: 100px;
+    width: 100px;
+    border-radius: 50px;
+    font-size: large;
+}
+.Trip_option_box .cloumn{
+    margin-bottom: 1rem;
+}
+.Trip_option_box .cloumn label{
+    width: 75%;
+    display: inline-block;
+    font-size: medium;
+    font-weight: bold;
+}
+.Trip_option_box .cloumn p {
+    display: inline-block;
+    width: 25%;
+    text-align: right;
+}
+.Trip_option_box .cloumn p input{
+
+}
+.Trip_option_box .cloumn p select{
+    width: 100%;
+    text-align: center;
+    height: 6vh;
+    background: none;
+    border: 2px solid black;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+.Bird_card{
+    display: inline-block;
+    border: 1px solid rgb(203, 201, 201);
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px;
+    vertical-align: text-top;
+    text-align: center;
+    box-sizing: border-box;
+}
+.margin_bottom{
+    margin-bottom: 2vh;
+}
+#default-btn::file-selector-button{
+    padding: 6px 10px;
+    background-color: #1677ff;
+    border: 1px solid #1677ff;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+    font-size: var(--adm-font-size-9);
+    line-height: 1.4;
+}
