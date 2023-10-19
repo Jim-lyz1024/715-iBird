@@ -1,0 +1,22 @@
+.adm-floating-panel-header {
+  height: 20px;  
+  background: linear-gradient(to bottom, #108EE9, #007AFF); 
+  cursor: grab;  
+  box-shadow: 0px 0px 5px #000;  
+  border-radius: 6px;  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.adm-floating-panel-header::after {
+  content: '⇡'; 
+  font-size: 16px;
+  color: #fff;
+  margin-left: 10px;
+}
+
+.locked-panel {
+  transform: translateY(calc(100% + -85vh)) !important;
+}

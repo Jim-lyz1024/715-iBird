@@ -9,6 +9,8 @@ import { AutoCenter } from 'antd-mobile'
 import { List, Switch,Image } from 'antd-mobile'
 import { useNavigate } from "react-router-dom";
 import { Button} from 'antd-mobile'
+import './Dashboard.css';
+import logo from '../../public/iBirdLogo.png';
 
 
 export default function Dashboard() {
@@ -35,8 +37,10 @@ export default function Dashboard() {
 
     return (
         <div>
-
-                <p className='title'>Welcome, {username}</p>
+                <div className="header">
+                    <p className='title'>Welcome, {username}</p>
+                    <img src={logo} alt="Project Logo" className="logo" />
+                </div>
                 <List>
                     <List.Item onClick={()=> navigate("/start")}>Getting Started!</List.Item>
                     <List.Item onClick={()=>  navigate("/community")}>Community</List.Item>

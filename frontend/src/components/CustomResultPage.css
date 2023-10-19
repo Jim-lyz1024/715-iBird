@@ -1,0 +1,45 @@
+.result-container {
+  padding: 20px;
+  background: linear-gradient(to right, #f9f9f9, #afdfe4);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.result-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  /* text-shadow: 2px 2px 4px #7bbfea; */
+}
+
+.result-title::after {
+  content: "\1F4CA"; /* Example: Bar chart emoji */
+}
+
+.result-text {
+  font-size: 18px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.result-button {
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.result-button:hover {
+  background-color: #0056b3;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.result-total {
+  margin-top: 10px;
+  font-size: 25px;
+}

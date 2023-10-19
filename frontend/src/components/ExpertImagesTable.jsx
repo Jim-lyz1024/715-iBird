@@ -1,10 +1,12 @@
 import React from 'react'
 import { useNavigator } from '../hooks/useNavigator'
+import { Button} from 'antd-mobile'
+import './ExpertImagesTable.css';
 
 export default function ExpertImagesTable({ images, handleUpdateClick }) {
     const navigateWithState = useNavigator();
     return (
-        <table>
+        <table className="expert-images-table">
             <thead>
                 <tr>
                     <th>Username</th>
@@ -15,8 +17,8 @@ export default function ExpertImagesTable({ images, handleUpdateClick }) {
             </thead>
             <tbody>
                 {images.map(image => (
-                    <tr key={image._id}>
-                        <td
+                    <tr key={image._id} className="table-row">
+                        <td className="clickable-cell"
                             onClick={() => navigateWithState(`/users/${image.userId.username}`, { replace: true })}
                             style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
                             {image.userId.username}
@@ -29,13 +31,13 @@ export default function ExpertImagesTable({ images, handleUpdateClick }) {
                             />
                         </td>
                         {image.birdId ?
-                            <td
+                            <td className="clickable-cell"
                                 onClick={() => navigateWithState(`/bird/${image.birdId.name}`, { replace: true })}
                                 style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>
                                 {image.birdId.name}
-                            </td> : <td>No Bird</td>
+                            </td> : <td>Not a Bird</td>
                         }
-                        <td><button onClick={() => handleUpdateClick(image)}>Update</button></td>
+                        <td><button className="update-button" onClick={() => handleUpdateClick(image)}>Update</button></td>
                     </tr>
                 ))}
             </tbody>

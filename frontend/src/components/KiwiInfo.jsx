@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { levelUp, getUserInfo } from "../api/api";
-import { Button, ProgressBar, Space } from 'antd-mobile'
+import { Button, ProgressBar, Space } from 'antd-mobile';
+import Spinner from '../components/Spinner';
 
 
 export default function KiwiInfo({ username, canLevelUp }) {
@@ -11,7 +12,6 @@ export default function KiwiInfo({ username, canLevelUp }) {
             getUserInfo(localStorage.getItem('token'), username)
                 .then((res) => {
                     setUser(res.data);
-                    console.log(res.data);
                 });
         }
     }, [username]);
@@ -27,7 +27,7 @@ export default function KiwiInfo({ username, canLevelUp }) {
             });
     };
 
-    if (!user) return <div>Loading...</div>;
+    if (!user) return <Spinner />;
 
     const expNeededForNextLevel = user.kiwiLevel * 1000;
 
@@ -40,41 +40,36 @@ export default function KiwiInfo({ username, canLevelUp }) {
             <div className="row">
                 <div className="cloumn">
                     <p className="cloumn_name">Level: </p>
-                    <p className="cloumn_progress">
+                    <div className="cloumn_progress">
                         <Space direction='vertical' block>
-                            <ProgressBar percent={user.kiwiLevel}  text={'Lv.'+user.kiwiLevel} />
+                            <ProgressBar percent={user.kiwiLevel} text={'Lv.' + user.kiwiLevel} />
                         </Space>
-                    </p>
+                    </div>
                 </div>
 
-                {/* <div className="cloumn">
-                    Stage: 
-                    {user.kiwiStage}
-                </div> */}
-
-                {user.kiwiLevel < 100 && 
+                {user.kiwiLevel < 100 &&
                     <div className="cloumn">
-                        <p className="cloumn_name">EXP:</p>
-                        <p className="cloumn_progress">
+                        <div className="cloumn_name">EXP:</div>
+                        <div className="cloumn_progress">
                             <Space direction='vertical' block>
-                                <ProgressBar percent={(user.kiwiExp/expNeededForNextLevel)*100} text={user.kiwiExp+"/"+expNeededForNextLevel} />
+                                <ProgressBar percent={(Math.floor(user.kiwiExp) / expNeededForNextLevel) * 100} text={Math.floor(user.kiwiExp) + "/" + Math.floor(expNeededForNextLevel)} />
                             </Space>
-                        </p>
+                        </div>
                     </div>}
 
                 {canLevelUp && <>
                     <div className="cloumn">
                         <p className="cloumn_name">My Scores: </p>
-                        <p className="cloumn_progress">
+                        <div className="cloumn_progress">
                             <Space direction='vertical' block>
-                                <ProgressBar percent={user.scores>0?'100':'0'} text={user.scores} />
+                                {/*<ProgressBar percent={user.scores>0?'100':'0'} text={user.scores} />*/}
+                                <ProgressBar percent={Math.floor(user.scores) > 0 ? '100' : '0'} text={Math.floor(user.scores)} />
                             </Space>
-                        </p>
+                        </div>
                     </div>
                     {user.kiwiLevel < 100 && <div className="cloumn_button"><Button block fill='outline' color='primary' onClick={handleLevelUp}>Level Up</Button></div>}
                 </>}
             </div>
-           
         </div>
     );
 }

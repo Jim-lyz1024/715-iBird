@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/getfriends", verifyToken, async (req, res) => {
     try {
         // Find the user and populate their friends list
-        const user = await User.findById(req.user._id).populate('friends', 'username');
+        const user = await User.findById(req.user._id).populate('friends', 'username kiwiStage');
         if (!user) {
             return res.sendStatus(404);
         }

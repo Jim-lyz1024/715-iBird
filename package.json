@@ -1,0 +1,17 @@
+{
+  "name": "compsci-715-group-3-project-12-ibird",
+  "version": "1.0.0",
+  "description": "`examples` folder: Contains all examples that serve as the building blocks for our project.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku-postbuild": "cd frontend && npm install && npm run build",
+    "start": "cd backend && npm install && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

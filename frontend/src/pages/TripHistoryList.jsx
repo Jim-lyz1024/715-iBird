@@ -3,6 +3,8 @@ import NavigationButton from "../components/NavigationButton";
 import { getInactiveTrips } from '../api/api';
 import { useNavigate } from "react-router-dom/dist";
 import { List, Switch } from 'antd-mobile'
+import Spinner from "../components/Spinner";
+// import './TripHistoryList.css';
 
 
 export default function TripHistoryList() {
@@ -21,10 +23,9 @@ export default function TripHistoryList() {
                 }));
 
                 // Sort by startDate
-                processedTrips.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                processedTrips.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
 
                 setTrips(processedTrips);
-                console.log(processedTrips);
                 setIsLoading(false);
             })
             .catch(err => {
@@ -34,17 +35,14 @@ export default function TripHistoryList() {
             });
     }, [token]);
 
-     
-
-
-    const createTime=(date)=>{
-        var currentTime=new Date(date);
+    const createTime = (date) => {
+        var currentTime = new Date(date);
         let year = currentTime.getFullYear();
         let month = currentTime.getMonth() + 1;
         let day = currentTime.getDate();
-        let yfEn=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][ currentTime.getMonth() ];
+        let yfEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][currentTime.getMonth()];
         let week = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][currentTime.getDay()];
-        return week+","+day+" "+yfEn;
+        return week + ", " + day + " " + yfEn;
     }
 
 
@@ -54,41 +52,16 @@ export default function TripHistoryList() {
             <NavigationButton path="/start" text="TripHistory" />
 
             {isLoading ? (
-                <p>Loading...</p>
+                <Spinner />
             ) : error ? (
                 <p>Error loading trips. Please try again.</p>
             ) : (
-                // <table>
-                //     <thead>
-                //         <tr>
-                //             <th>Index</th>
-                //             <th>Start Date</th>
-                //             <th>End Date</th>
-                //             <th>Duration(minutes)</th>
-                //             <th>distance</th>
-                //             <th>elevationGain</th>
-                //         </tr>
-                //     </thead>
-                //     <tbody>
-                //         {trips.map((trip, index) => (
-                //             // round to 2dp
-                //             <tr key={index} onClick={() => navigate(`/start/history/${trip._id}`, { replace: true })}>
-                //                 <td style={{ color: 'blue', textDecoration: 'underline', cursor: 'pointer' }}>{index + 1}</td>
-                //                 <td>{trip.startDate}</td>
-                //                 <td>{trip.endDate}</td>
-                //                 <td>{Math.round(trip.duration / 1000 / 60 * 100) / 100}</td>
-                //                 <td>{trip.distance}</td>
-                //                 <td>{trip.elevationGain}</td>
-                //             </tr>
-                //         ))}
-                //     </tbody>
-                // </table>
                 <List>
-                    {trips.map((trip, index) => ( 
-                           <List.Item key={index}  onClick={() => navigate(`/start/history/${trip._id}`, { replace: true })}>
-                                <p>{createTime(trip.startDate)}</p>
-                            </List.Item>
-                        ))}
+                    {trips.length !== 0 ? trips.map((trip, index) => (
+                        <List.Item key={index} className="list-item" onClick={() => navigate(`/start/history/${trip._id}`, { replace: true })}>
+                            <p>{createTime(trip.startDate)}</p>
+                        </List.Item>
+                    )) : <p>No history trips</p>}
                 </List>
             )}
         </div>

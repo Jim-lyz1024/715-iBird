@@ -32,23 +32,22 @@ export default function Profile() {
         <div>
             <NavigationButton path={previousPath} text={paramUsername} />
             {taragetUser ?
-                <div className='Profile_text_box Text_column_box' style={{"paddingBottom":"0px"}}>
-                    {/* <p>User id: {`${taragetUser._id}`}</p> */}
+                <div className='Profile_text_box Text_column_box' style={{ "paddingBottom": "0px" }}>
                     <p>
-                        <span className='cloumn_name' style={{"width":"60%"}}>User Name: </span>
-                        <span className='cloumn_content' style={{"width":"40%"}}>{`${paramUsername}`}</span>
+                        <span className='cloumn_name' style={{ "width": "60%" }}>User Name: </span>
+                        <span className='cloumn_content' style={{ "width": "40%" }}>{`${paramUsername}`}</span>
                     </p>
                     <p>
-                        <span className='cloumn_name' style={{"width":"60%"}}>Total Walking Distance: </span>
-                        <span className='cloumn_content' style={{"width":"40%"}}>{`${taragetUser.totalWalkingDistance}`}</span>
+                        <span className='cloumn_name' style={{ "width": "60%" }}>Total Walking Distance: </span>
+                        <span className='cloumn_content' style={{ "width": "40%" }}>{`${taragetUser.totalWalkingDistance}`}</span>
                     </p>
                     <p>
-                        <span className='cloumn_name' style={{"width":"60%"}}>Total Elevation Gain: </span>
-                        <span className='cloumn_content' style={{"width":"40%"}}>{`${taragetUser.totalElevationGain}`}</span>
+                        <span className='cloumn_name' style={{ "width": "60%" }}>Total Elevation Gain: </span>
+                        <span className='cloumn_content' style={{ "width": "40%" }}>{`${taragetUser.totalElevationGain.toFixed(1)}`}</span>
                     </p>
                     <p>
-                        <span className='cloumn_name' style={{"width":"60%"}}>Total Correct Quizes: </span>
-                        <span className='cloumn_content' style={{"width":"40%"}}>{`${taragetUser.totalCorrectQuizes}`}</span>
+                        <span className='cloumn_name' style={{ "width": "60%" }}>Total Correct Quizes: </span>
+                        <span className='cloumn_content' style={{ "width": "40%" }}>{`${taragetUser.totalCorrectQuizes}`}</span>
                     </p>
                 </div> :
                 <p className='Profile_text_box'>Not Found</p>
@@ -56,14 +55,25 @@ export default function Profile() {
             <KiwiInfo username={paramUsername} canLevelUp={false} />
             <BirdCollection username={paramUsername} showRemainBird={false} />
             <Challenges username={paramUsername} />
-            {taragetUser && <button style={{ display: username === paramUsername ? 'none' : 'block' }}
-                onClick={username === paramUsername ?
-                    () => { } :
-                    friends.includes(paramUsername) ?
-                        () => handleRemoveFriend(paramUsername, fetchFriends) :
-                        () => handleAddFriend(paramUsername, fetchFriends)}>
-                {username === paramUsername ? '' : friends.includes(paramUsername) ? "❤️" : "🤍"}
-            </button>}
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {taragetUser && <button
+                    style={{
+                        display: username === paramUsername ? 'none' : 'block',
+                        padding: '3px 3px',
+                        margin: '20px 0',
+                        fontSize: '18px',
+                        borderRadius: '10px',
+                        fontSize: '40px'
+                    }}
+                    onClick={username === paramUsername ?
+                        () => { } :
+                        friends.includes(paramUsername) ?
+                            () => handleRemoveFriend(paramUsername, fetchFriends) :
+                            () => handleAddFriend(paramUsername, fetchFriends)}>
+                    {username === paramUsername ? '' : friends.includes(paramUsername) ? "❤️" : "🤍"}
+                </button>}
+            </div>
         </div>
     )
 }

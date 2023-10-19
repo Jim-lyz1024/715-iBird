@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { User, Trip, Bird, Image } = require("../../db/schema");
 const { verifyToken } = require("../../middleware/auth.js");
 const router = express.Router();
@@ -47,9 +48,15 @@ const { selectRandomQuestions } = require('./utility')
 const {
     LEVEL_1_DISTANCE_GOAL,
     LEVEL_2_DISTANCE_GOAL,
-    LEVEL_3_DISTANCE_GOAL } = require('../../goals_setting/fitnessGoal');
+    LEVEL_3_DISTANCE_GOAL,
+    LEVEL_4_DISTANCE_GOAL,
+    LEVEL_5_DISTANCE_GOAL,
+    LEVEL_6_DISTANCE_GOAL,
+    LEVEL_7_DISTANCE_GOAL,
+    LEVEL_8_DISTANCE_GOAL } = require('../../goals_setting/fitnessGoal');
 
 const client = new Client({});
+const {uploadingTrips} = require('../sharedState');
 
 router.post("/startNewTrip", verifyToken, async (req, res) => {
     const userId = req.user._id;
@@ -58,20 +65,35 @@ router.post("/startNewTrip", verifyToken, async (req, res) => {
     if (trip) return res.status(400).send("You can only have one active trip").populate('images');
 
     // Check for required fields
-    if (typeof req.body.isEdugaming !== 'boolean' || !req.body.fitnessLevel) {
-        return res.status(400).send("Both isEdugaming and fitnessLevel are required");
+    if (typeof req.body.isEdugaming !== 'boolean' || !req.body.level) {
+        return res.status(400).send("Both isEdugaming and level are required");
     }
 
     let distanceGoal;
-    switch (req.body.fitnessLevel) {
-        case 'low':
+    switch (req.body.level) {
+        case '1000 meters':
             distanceGoal = LEVEL_1_DISTANCE_GOAL;
             break;
-        case 'mid':
+        case '2000 meters':
             distanceGoal = LEVEL_2_DISTANCE_GOAL;
             break;
-        case 'high':
+        case '3000 meters':
             distanceGoal = LEVEL_3_DISTANCE_GOAL;
+            break;
+        case '4000 meters':
+            distanceGoal = LEVEL_4_DISTANCE_GOAL;
+            break;
+        case '5000 meters':
+            distanceGoal = LEVEL_5_DISTANCE_GOAL;
+            break;
+        case '6000 meters':
+            distanceGoal = LEVEL_6_DISTANCE_GOAL;
+            break;
+        case '7000 meters':
+            distanceGoal = LEVEL_7_DISTANCE_GOAL;
+            break;
+        case '8000 meters':
+            distanceGoal = LEVEL_8_DISTANCE_GOAL;
             break;
         default:
             return res.status(400).send("Invalid fitness level provided");
@@ -98,7 +120,7 @@ router.post("/startNewTrip", verifyToken, async (req, res) => {
         newTrip = await Trip.create({
             userId: userId,
             isEdugaming: req.body.isEdugaming,
-            fitnessLevel: req.body.fitnessLevel,
+            level: distanceGoal.level,
             distanceGoal: distanceGoal,
             birdCountGoals: [birdCountGoal]
         });
@@ -106,7 +128,7 @@ router.post("/startNewTrip", verifyToken, async (req, res) => {
         newTrip = await Trip.create({
             userId: userId,
             isEdugaming: req.body.isEdugaming,
-            fitnessLevel: req.body.fitnessLevel,
+            level: distanceGoal.level,
             distanceGoal: distanceGoal
         });
     }
@@ -114,19 +136,31 @@ router.post("/startNewTrip", verifyToken, async (req, res) => {
 });
 
 router.post("/addLocation", verifyToken, async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     const userId = req.user._id;
     const { latitude, longitude, timestamp } = req.body;
     let goalModified = false;
 
     const trip = await Trip.findOne({ userId, isActive: true });
 
-    if (!trip) return res.status(400).send("No active trip found.");
+    if (!trip) {
+        await session.commitTransaction();
+        session.endSession();
+        return res.status(400).send("No active trip found.");
+    }
 
+    // uploading photo, do not process add location
+    if (uploadingTrips[trip._id]) {
+        return res.status(200).json(trip);
+    }
     if (trip.locations.length > 0) {
         const lastLocation = trip.locations[trip.locations.length - 1];
 
         // If the new location matches the last location, skip it.
         if (latitude === lastLocation.latitude && longitude === lastLocation.longitude) {
+            await session.commitTransaction();
+            session.endSession();
             return res.status(200).json(trip);
         }
 
@@ -141,8 +175,16 @@ router.post("/addLocation", verifyToken, async (req, res) => {
             });
 
             // This value is in meters
-            const distance = response.data.rows[0].elements[0].distance.value;
             const originDistance = trip.distance;
+            const distanceGoogle = Math.round(response.data.rows[0].elements[0].distance.value);
+            const distanceHav = Math.round(haversineDistance(lastLocation.latitude, lastLocation.longitude, latitude, longitude));
+
+            const lastTime = new Date(lastLocation.timestamp).getTime();
+            const thisTime = new Date(timestamp).getTime();
+            const timeDifferenceSeconds = (thisTime - lastTime) / 1000; // Convert difference from milliseconds to seconds
+            const estimatedDistance = Math.round(2.5 * timeDifferenceSeconds);
+
+            const distance = Math.min(distanceGoogle, distanceHav, estimatedDistance);
             trip.distance += distance;
             trip.scores += DISTANCE_COEFFECIENT * distance;
 
@@ -158,7 +200,6 @@ router.post("/addLocation", verifyToken, async (req, res) => {
             if (additionalElevationGain !== null) {
                 trip.elevationGain += additionalElevationGain;
             }
-            console.log(trip.elevationGain)
 
             // get goal, check if complete or not
             const distanceGoal = trip.distanceGoal.distance;
@@ -171,15 +212,13 @@ router.post("/addLocation", verifyToken, async (req, res) => {
                 if (trip.distance >= distanceGoal && duration <= distanceGoalDurationLimit) {
                     distanceGoalSuccess = true;
                     trip.distanceGoal.status = 'success';
-                    trip.scores += EXERCISE_GOAL_COEFFECIENT;
+                    trip.scores += EXERCISE_GOAL_COEFFECIENT * trip.level;
                 }
                 else if (duration > distanceGoalDurationLimit) {
                     trip.distanceGoal.endDistance = originDistance;
                     trip.distanceGoal.status = 'failed';
                 } else {
                     // assess user fitness
-                    console.log("duration" + duration);
-                    console.log("FITNESS_ASSESSMENT_TIME " + FITNESS_ASSESSMENT_TIME * 60 * 1000);
                     if (duration >= (FITNESS_ASSESSMENT_TIME * 60 * 1000) && !trip.fitnessAssessed) {
                         trip.fitnessAssessed = true;
                         // Calculate average speed (in meters per millisecond)
@@ -191,8 +230,6 @@ router.post("/addLocation", verifyToken, async (req, res) => {
                         // Calculate the distance the player can cover with the average speed in the remaining time
                         const possibleDistanceWithAverageSpeed = averageSpeed * remainingTime;
 
-                        console.log("possibleDistanceWithAverageSpeed" + possibleDistanceWithAverageSpeed)
-                        console.log("remainingDistance" + remainingDistance)
                         if ((possibleDistanceWithAverageSpeed < remainingDistance) && (possibleDistanceWithAverageSpeed > 0)) {
                             trip.distanceGoal.distance = trip.distance + possibleDistanceWithAverageSpeed;
                             goalModified = true;
@@ -204,7 +241,7 @@ router.post("/addLocation", verifyToken, async (req, res) => {
 
             // check if player has not found bird for a duration minutes
             const durationPlayerNotFoundBird = new Date(timestamp) - new Date(trip.lastTimeFoundBird);
-            if (durationPlayerNotFoundBird > (BIRD_FLOW_DURATION * 60 * 1000) && !trip.quiz) {
+            if (trip.isEdugaming && durationPlayerNotFoundBird > (BIRD_FLOW_DURATION * 60 * 1000) && !trip.quiz) {
                 trip.lastTimeFoundBird = new Date(timestamp);
 
                 // Fetch the user details using userId
@@ -251,6 +288,8 @@ router.post("/addLocation", verifyToken, async (req, res) => {
             if (timeDifference > 1800000) { // 30 minutes in milliseconds
                 trip.isActive = false;
                 await trip.save();
+                await session.commitTransaction();
+                session.endSession();
                 return res.status(400).send("Trip ended due to long time inactivated.");
             } else if (distance > 500) { // More than 500 meters
                 if (trip.suspiciousLocation) {
@@ -270,6 +309,8 @@ router.post("/addLocation", verifyToken, async (req, res) => {
             }
 
             await trip.save();
+            await session.commitTransaction();
+            session.endSession();
             if (goalModified) {
                 return res.status(207).json(trip);  // 207 Multi-Status
             } else {
@@ -277,6 +318,8 @@ router.post("/addLocation", verifyToken, async (req, res) => {
             }
 
         } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
             console.error(error);
             return res.status(500).send("Error computing distance using Google Maps.");
         }
@@ -285,6 +328,8 @@ router.post("/addLocation", verifyToken, async (req, res) => {
         trip.startDate = new Date(timestamp);
         trip.endDate = new Date(timestamp);
         await trip.save();
+        await session.commitTransaction();
+        session.endSession();
         return res.status(200).json(trip);
     }
 });
@@ -347,40 +392,50 @@ router.get("/getTrip/:tripId", verifyToken, async (req, res) => {
 });
 
 router.post("/endTrip", verifyToken, async (req, res) => {
-    const userId = req.user._id;
-    const user = await User.findById(req.user._id);
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const userId = req.user._id;
+        const user = await User.findById(req.user._id);
 
-    const trip = await Trip.findOne({ userId, isActive: true });
-    if (!trip) return res.status(400).send("No active trip found.");
+        const trip = await Trip.findOne({ userId, isActive: true });
+        if (!trip) return res.status(400).send("No active trip found.");
 
-    if (trip.distanceGoal.status === 'inProgress') {
-        trip.distanceGoal.status = 'failed';
-    }
+        if (trip.distanceGoal.status === 'inProgress') {
+            trip.distanceGoal.status = 'failed';
+        }
 
-    if (trip.isEdugaming) {
-        // Update bird count goals that are inProgress to failed
-        for (let goal of trip.birdCountGoals) {
-            if (goal.status === 'inProgress') {
-                goal.status = 'failed';
+        if (trip.isEdugaming) {
+            // Update bird count goals that are inProgress to failed
+            for (let goal of trip.birdCountGoals) {
+                if (goal.status === 'inProgress') {
+                    goal.status = 'failed';
+                }
             }
         }
+
+        trip.isActive = false;
+        trip.endDate = Date.now();
+        trip.quiz = null;
+
+        user.totalWalkingDistance += trip.distance;
+        user.totalElevationGain += trip.elevationGain;
+
+        user.scores += trip.scores;
+
+        checkChallenges(user);
+
+        await trip.save();
+        await user.save();
+        await session.commitTransaction();
+        session.endSession();
+        return res.status(200).json(trip);
     }
-
-    trip.isActive = false;
-    trip.endDate = Date.now();
-    trip.quiz = null;
-
-    user.totalWalkingDistance += trip.distance;
-    user.totalElevationGain += trip.elevationGain;
-
-    user.scores += trip.scores;
-
-    checkChallenges(user);
-
-    await trip.save();
-    await user.save();
-
-    return res.status(200).json(trip);
+    catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(500).send('Server Error');
+    }
 });
 
 const checkChallenges = (user) => {
@@ -443,13 +498,14 @@ const checkChallenges = (user) => {
 
 
 router.post('/submitQuizResults', verifyToken, async (req, res) => {
+    let activeTrip;
     try {
         const userId = req.user._id;
         const user = await User.findById(req.user._id);
         const quizResults = req.body.quizResults;
 
         // Find the active trip and set the quiz to null
-        const activeTrip = await Trip.findOne({ userId: userId, isActive: true });
+        activeTrip = await Trip.findOne({ userId: userId, isActive: true });
         let birdRarity = 0;
         const isFlowHelper = activeTrip.quiz.isFlowHelper;
         const birdName = activeTrip.quiz.birdName;
@@ -502,10 +558,9 @@ router.post('/submitQuizResults', verifyToken, async (req, res) => {
             const lastLocation = activeTrip.locations[activeTrip.locations.length - 1];
 
             const randomImageUrl = bird.images[Math.floor(Math.random() * bird.images.length)];
-            const s3Key = randomImageUrl.split('.amazonaws.com/')[1];
             // create image
             const newImage = new Image({
-                s3Key: s3Key,
+                s3Key: randomImageUrl,
                 userId: req.user._id,
                 location: {
                     lat: lastLocation.latitude,
@@ -537,6 +592,10 @@ router.post('/submitQuizResults', verifyToken, async (req, res) => {
         res.status(200).send('Quiz results processed successfully');
     } catch (error) {
         console.log(error.message)
+        if (activeTrip) {
+            activeTrip.quiz = null;
+            await activeTrip.save();
+        }
         res.status(500).send('Server Error');
     }
 });
@@ -556,9 +615,6 @@ async function getElevationGainBetweenTwoPoints(path) {
 
         if (response.data.status === 'OK') {
             const elevationData = response.data.results;
-            console.log(path);
-            console.log("last " + elevationData[1].elevation);
-            console.log("first " + elevationData[0].elevation);
             let elevationChange = elevationData[1].elevation - elevationData[0].elevation;
             return elevationChange > 0 ? elevationChange : 0;
         } else {
@@ -567,6 +623,25 @@ async function getElevationGainBetweenTwoPoints(path) {
     } catch (error) {
         throw error;
     }
+}
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth radius in meters
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
+}
+
+function toRadians(degrees) {
+    return degrees * (Math.PI / 180);
 }
 
 module.exports = router;

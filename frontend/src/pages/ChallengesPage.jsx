@@ -8,7 +8,7 @@ export default function ChallengesPage() {
 
     return (
         <div>
-            <NavigationButton path="/" text="Rewards" />
+            <NavigationButton path="/" text="My Badges" />
             <Challenges username={username} />
         </div>
     );

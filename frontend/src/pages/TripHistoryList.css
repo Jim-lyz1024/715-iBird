@@ -1,0 +1,21 @@
+/* List Styles */
+.list-item {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 10px 0;
+  padding: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.list-item:hover {
+  background-color: #f5f5f5;
+}
+
+/* Text Styles */
+.list-item p {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}

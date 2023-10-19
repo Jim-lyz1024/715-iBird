@@ -17,7 +17,7 @@ export default function UsernamePasswordForm({ buttonText, onSubmit }) {
         <div>
             <form onSubmit={handleSubmit} className="Form_box">
                 <p>
-                    <label for="username">Username:</label>
+                    <label htmlFor="username">Username:</label>
                     <input
                         id="username"
                         type="text"
@@ -28,7 +28,7 @@ export default function UsernamePasswordForm({ buttonText, onSubmit }) {
                 </p>
 
                 <p>
-                    <label for="password">Password:</label>
+                    <label htmlFor="password">Password:</label>
                     <input
                         id="password"
                         type="password"

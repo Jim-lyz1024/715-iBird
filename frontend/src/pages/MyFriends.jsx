@@ -5,6 +5,7 @@ import { useContext } from 'react';
 import UserContext from '../../UserContext';
 import { getFriends } from "../api/api"
 import { useFriendData } from '../hooks/useFriendData';
+import Spinner from '../components/Spinner';
 
 export default function MyFriends() {
     const [users, setUsers] = useState([]);

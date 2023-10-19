@@ -28,8 +28,8 @@ export default function BirdCamera({ onPhotoCaptured }) {
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        width: '100vw',
+        height: '100vh',
         zIndex: 1000,  // Ensure it's above other components
         backgroundColor: 'black'
     };
@@ -40,7 +40,7 @@ export default function BirdCamera({ onPhotoCaptured }) {
                 <div style={cameraStyle}>
                     {photoSrc ? (
                         <div>
-                            <img src={photoSrc} alt="Captured" />
+                            <img src={photoSrc} alt="Captured" style={{width:"100vw"}}/>
                             <Button color='primary'   onClick={() => setPhotoSrc('')}>Retake</Button>
                             <Button color='primary'   onClick={handleSubmitPhoto}>Submit</Button>
                             <Button color='primary'   onClick={closeCamera}>Back</Button>

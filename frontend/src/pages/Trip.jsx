@@ -4,13 +4,15 @@ import { startNewTrip, getActiveTrip, addLocation, endTrip, uploadImage } from "
 import { useNavigate } from "react-router-dom";
 import TripMap from "../components/TripMap";
 import BirdImageUploader from "../components/BirdImageUploader";
-import BirdCamera from "../components/BirdCamera";
 import { useLocation } from "react-router-dom";
 import FitnessGoalProgress from "../components/FitnessGoalProgress";
 import BirdCountGoalProgress from "../components/BirdCountGoalProgress";
 import TripStatistics from "../components/TripStatistics";
 import QuizComponent from "../components/QuizComponent";
-import {FloatingPanel,SearchBar,Avatar,Space,Card,List,Button} from 'antd-mobile'
+import { FloatingPanel, Button } from 'antd-mobile';
+import Spinner from "../components/Spinner";
+import './Trip.css';
+
 const aucklandlat = -36.8484;
 const aucklandLng = 174.7633;
 
@@ -28,6 +30,10 @@ export default function Trip() {
     const [tripForGoal, setTripForGoal] = useState(null);
     const [currentTimestamp, setCurrentTimestamp] = useState(null);
     const [autoCentering, setAutoCentering] = useState(true);
+    const [showCropPopup, setShowCropPopup] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+
     const token = localStorage.getItem("token");
     const navigate = useNavigate();
 
@@ -35,11 +41,13 @@ export default function Trip() {
     // Set the default options
     const defaultOptions = {
         isEdugaming: true,
-        fitnessLevel: 'mid'
+        level: '1000 meters'
     };
     // If options are provided in the location state, it'll overwrite the default options
     const options = { ...defaultOptions, ...location.state };
-    const anchors = [100, window.innerHeight * 0.4, window.innerHeight * 0.8]
+
+    const [anchors, setAnchors] = useState([60]);
+
 
     const handlePhotoCaptured = (dataUri) => {
         // Convert Data URI to Blob
@@ -54,11 +62,12 @@ export default function Trip() {
                     .then(res => {
                         console.log('Successfully uploaded');
                         fetchTripDetails();
+                        // setIsLoading(false);
                     })
                     .catch(error => {
                         console.error('Error uploading image:', error);
+                        // setIsLoading(false);
                     });
-
             });
     };
 
@@ -74,7 +83,7 @@ export default function Trip() {
                     }));
                     setPath(existingPath);
                 } else {
-                    return startNewTrip(token, options.isEdugaming, options.fitnessLevel)
+                    return startNewTrip(token, options.isEdugaming, options.level)
                         .then((res) => {
                             setTrip(res.data);
                         });
@@ -84,7 +93,8 @@ export default function Trip() {
 
     useEffect(() => {
         let watchId;
-
+        let lastSentTimestamp = null;
+        const sendInterval = 5000; // 5 second
         const trackLocation = () => {
             if (navigator.geolocation) {
                 watchId = navigator.geolocation.watchPosition(showPosition, (error) => {
@@ -96,6 +106,16 @@ export default function Trip() {
         };
 
         const showPosition = (position) => {
+            const ct = new Date();
+            setSpeed(position.coords.speed);
+
+            // Check if enough time has passed since the last sent timestamp
+            // Do not upload location when uploading
+            if ((lastSentTimestamp && ct - lastSentTimestamp < sendInterval) || isUploading) {
+                return; // Do not send update yet
+            }
+
+            lastSentTimestamp = ct;
             const latLng = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
@@ -112,13 +132,12 @@ export default function Trip() {
                     }));
 
                     if (res.status === 207) {
-                        alert('Your goal has been modified based on your current average speed.');
+                        alert('Based on your current average speed, we reduced your target distance. Have fun!');
                     }
 
                     setTripForGoal(res.data);
                     setPath(updatedPath);
                     setCurrentPosition(latLng);
-                    setSpeed(position.coords.speed);
                     setCurrentTimestamp(currentTime);
                 })
                 .catch(error => {
@@ -139,7 +158,7 @@ export default function Trip() {
                     setPath(existingPath);
                     trackLocation();
                 } else {
-                    startNewTrip(token, options.isEdugaming, options.fitnessLevel)
+                    startNewTrip(token, options.isEdugaming, options.level)
                         .then((res) => {
                             setTrip(res.data);
                             trackLocation();
@@ -156,19 +175,22 @@ export default function Trip() {
     }, []);
 
     const handleEndTrip = () => {
+        setIsLoading(true);
         endTrip(token)
             .then(() => {
                 navigate("/start", { replace: true });
             })
             .catch(error => {
                 console.error("Error ending the trip:", error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }
-
     return (
         <div>
+            {(isLoading || !trip || !tripForGoal) && <Spinner />}
             <NavigationButton path="/start" text="Trip" />
-            
 
             <TripMap
                 path={path}
@@ -176,36 +198,43 @@ export default function Trip() {
                 autoCentering={autoCentering}
                 images={trip?.images}
                 trip={trip}
+                onMapHeightChange={(newHeight) => {
+                    const mapHeight = newHeight;
+                    const windowHeight = window.innerHeight;
+                    setAnchors([60, windowHeight - 45 - mapHeight, windowHeight - 45 - mapHeight / 3 * 2]);
+                }}
             />
             {tripForGoal && tripForGoal.quiz && <QuizComponent quizData={tripForGoal.quiz} afterSubmit={fetchTripDetails} />}
 
-            <FloatingPanel anchors={anchors}>
+            <FloatingPanel anchors={anchors} className={`${showCropPopup ? "locked-panel" : ""}`}>
                 <div className="floatingpanel_box">
                     <div className="margin_bottom">
                         {trip && trip.isEdugaming && <BirdImageUploader
                             onUploadComplete={fetchTripDetails}
                             location={currentPosition}
                             timestamp={currentTimestamp}
+                            showCropPopup={showCropPopup}
+                            setShowCropPopup={setShowCropPopup}
+                            IsUploading={isUploading}
+                            setIsUploading={setIsUploading}
                         />}
                     </div>
-                    
-                        <Button color='primary'  onClick={handleEndTrip}>End Trip</Button>
-                        
 
-                        <Button className="margin_left" color='primary'  onClick={() => setAutoCentering(prev => !prev)}>
-                            {autoCentering ? "Stop Centering" : "Resume Centering"}
-                        </Button>
+                    <Button color='primary' onClick={handleEndTrip}>End Trip</Button>
 
-                        <TripStatistics trip={tripForGoal} realSpeed={speed} />
-                        {trip && trip.isEdugaming && <BirdCamera onPhotoCaptured={handlePhotoCaptured} />}
-                        <FitnessGoalProgress trip={tripForGoal} />
-                        {trip && trip.isEdugaming && <>
-                            <BirdCountGoalProgress goals={tripForGoal?.birdCountGoals} /></>}
+
+                    <Button className="margin_left" color='primary' onClick={() => setAutoCentering(prev => !prev)}>
+                        {autoCentering ? "Stop Centering" : "Resume Centering"}
+                    </Button>
+
+                    <TripStatistics trip={tripForGoal} realSpeed={speed} />
+
+                    <h3 style={{ paddingTop: "1px", fontSize: "20px" }}>Goals</h3>
+                    <FitnessGoalProgress trip={tripForGoal} />
+                    {trip && trip.isEdugaming && <>
+                        <BirdCountGoalProgress goals={tripForGoal?.birdCountGoals} /></>}
                 </div>
             </FloatingPanel>
-
-           
-
         </div>
     );
 }

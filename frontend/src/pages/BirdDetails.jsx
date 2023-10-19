@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { getBird } from '../api/api';
 import NavigationButton from '../components/NavigationButton';
+import './BirdDetails.css';
+import Spinner from '../components/Spinner';
 
 export default function BirdDetails() {
     const [bird, setBird] = useState(null);
@@ -26,23 +28,36 @@ export default function BirdDetails() {
         fetchBirdDetails();
     }, [name, token]);
 
-    if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
-    if (!bird) return <div>No bird found with the given name.</div>;
 
     return (
         <div>
-            <NavigationButton path={previousPath} text="back" />
-            <h2>{bird.name} {'🌟'.repeat(bird.rarity)}</h2>
-            <p><strong>Maori Name:</strong> {bird.maoriName}</p>
-            <p><strong>Scientific Name:</strong> {bird.scientificName}</p>
-            <p><strong>Other Names:</strong> {bird.otherNames.join(", ")}</p>
-            <p><strong>Conservation Status:</strong> {bird.conservationStatus}</p>
-            <p><strong>Rarity:</strong> {bird.rarity}</p>
-            <h3>Images:</h3>
-            {bird.images.map((imgSrc, index) => (
-                <img key={index} src={imgSrc} alt={`${bird.name} image ${index}`} style={{ width: "100%" }} />
-            ))}
+            {loading && <Spinner />}
+            <NavigationButton path={previousPath} text="Bird Detail" />
+            {bird && <div className="bird-details-container">
+                <h2 className="bird-title">{bird.name}</h2>
+                <div className="bird-info">
+                    <p><strong>Maori Name:</strong> {bird.maoriName}</p>
+                    <p><strong>Scientific Name:</strong> {bird.scientificName}</p>
+                    <p><strong>Other Names:</strong> {bird.otherNames.join(", ")}</p>
+                    <p><strong>Conservation Status:</strong> {bird.conservationStatus}</p>
+
+                    <p><strong>Weight:</strong> {bird.weight}</p>
+                    <p><strong>Length:</strong> {bird.length}</p>
+                    <p><strong>Food:</strong> {bird.food}</p>
+                    <p><strong>Habitat:</strong> {bird.habitat}</p>
+                    <p><strong>Rarity:</strong>{'🌟'.repeat(bird.rarity)}</p>
+                    <br />
+                    <p><strong>Description:</strong> {bird.description}</p>
+                    <br />
+                </div>
+                <div className="bird-images">
+                    <h3>Images:</h3>
+                    {bird.images.map((imgSrc, index) => (
+                        <img key={index} className="bird-image" src={imgSrc} alt={`${bird.name} image ${index}`} style={{ width: "100%" }} />
+                    ))}
+                </div>
+            </div>}
         </div>
     );
 };

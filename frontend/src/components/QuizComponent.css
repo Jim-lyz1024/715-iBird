@@ -1,0 +1,10 @@
+.react-quiz-container {
+  max-width: 85%;
+  overflow-x: hidden;
+}
+
+.questionWrapper,
+.questionWrapperBody {
+  max-width: 100%;
+  word-wrap: break-word;
+}

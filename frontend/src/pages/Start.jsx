@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react';
 import NavigationButton from '../components/NavigationButton';
 import { getActiveTrip } from '../api/api';
 import { useNavigate } from "react-router-dom";
-import { List } from 'antd-mobile'
+import { List } from 'antd-mobile';
+import Spinner from '../components/Spinner';
 
 export default function Start() {
     const [hasActiveTrip, setHasActiveTrip] = useState(false);
+    const [isloading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsLoading(true);
         getActiveTrip(localStorage.getItem('token'))
             .then(res => {
                 if (res.data && res.data.isActive) {
@@ -17,11 +20,15 @@ export default function Start() {
             })
             .catch(error => {
                 console.error("Error fetching active trip:", error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }, []);
 
     return (
         <div>
+            {isloading && <Spinner />}
             <NavigationButton path="/" text="Getting Started!" />
 
             <List>

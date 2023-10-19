@@ -4,6 +4,9 @@ import NavigationButton from "../components/NavigationButton";
 import { expertUpdateBird } from '../api/api';
 import ExpertImagesTable from '../components/ExpertImagesTable';
 import { useNavigator } from '../hooks/useNavigator';
+import { Button } from 'antd-mobile'
+import './ExpertOpinion.css';
+
 
 export default function ExpertOpinion() {
     const [images, setImages] = useState([]);
@@ -81,78 +84,51 @@ export default function ExpertOpinion() {
 
     return (
         <div>
-            <NavigationButton path="/" text="back" />
-            <button
-                onClick={() => navigateWithState(`/birds/collection`, { replace: true })}>
-                View Bird Collection
-            </button>
-            <h3>Verify these Birds</h3>
-            <ExpertImagesTable images={images.filter(img => img.expertStatus === 'inProgress')} handleUpdateClick={handleUpdateClick} />
-
-            <h3>Done</h3>
-            <ExpertImagesTable images={images.filter(img => img.expertStatus === 'done')} handleUpdateClick={handleUpdateClick} />
-
-            {showModal && (
-                <div style={overlayStyles}>
-                    <div style={formStyle}>
-                        <h3>Which Bird is This?</h3>
-                        <img src={selectedImage.imageUrl} style={{ width: '100%' }} />
-                        <h3>Select a Bird</h3>
-                        {birds.map(bird => (
-                            <div key={bird._id} style={{ width: '20%', display: 'inline-block' }}>
-                                <img src={bird.images[0]} style={{ width: '90%' }} />
-                                <br />
-                                <button
-                                    onClick={() => setSelectedBirdId(bird._id)}
-                                    style={bird._id === selectedBirdId ? selectedStyle : {}}
-                                >
-                                    {bird.name}
-                                </button>
-                                <br /><br />
-                            </div>
-                        ))}
-                        <br />
-                        <button
-                            onClick={() => setSelectedBirdId(null)}
-                            style={selectedBirdId === null ? selectedStyle : {}}
-                        >
-                            No Bird
-                        </button>
-                        <br /><br /><br />
-                        <button onClick={handleSubmit}>Submit</button>
-                        <br /><br />
-                        <button onClick={handleClose}>Cancel</button>
-                    </div>
+            <NavigationButton path="/" text="Expert Opinion" />
+            <div className="expert-opinion-container">
+                <Button className="view-collection-button" color='primary'
+                    onClick={() => navigateWithState(`/birds/collection`, { replace: true })}>
+                    View Bird Collection
+                </Button>
+                <div className="section-container">
+                    <h3 className="section-title">Pleasr verify these birds</h3>
+                    <ExpertImagesTable images={images.filter(img => img.expertStatus === 'inProgress')} handleUpdateClick={handleUpdateClick} />
                 </div>
-            )}
+                <div className="section-container">
+                    <h3 className="section-title">Verified</h3>
+                    <ExpertImagesTable images={images.filter(img => img.expertStatus === 'done')} handleUpdateClick={handleUpdateClick} />
+                </div>
+                {showModal && (
+                    <div className="overlay">
+                        <div className="modal-form">
+                            <h3 className="modal-title">What kind of bird is this?</h3>
+                            <img src={selectedImage.imageUrl} className="modal-image" />
+                            <h3 className="modal-title">Please select a bird</h3>
+                            <div className="bird-selection">
+                                {birds.map(bird => (
+                                    <div key={bird._id} className="bird-card">
+                                        <img src={bird.images[0]} className="bird-image" />
+                                        <button
+                                            className={`bird-button ${bird._id === selectedBirdId ? 'selected' : ''}`}
+                                            onClick={() => setSelectedBirdId(bird._id)}
+                                        >
+                                            {bird.name}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                            <button className={`bird-button ${selectedBirdId === null ? 'selected' : ''}`}
+                                onClick={() => setSelectedBirdId(null)}
+                            >
+                                No Bird
+                            </button>
+                            <br /><br /><br />
+                            <Button color='primary' className="modal-button" onClick={handleSubmit}>Submit</Button>
+                            <Button color='primary' className="modal-button" onClick={handleClose}>Cancel</Button>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
-
-const overlayStyles = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    zIndex: 1000,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-};
-
-const formStyle = {
-    width: '80%',
-    height: '80%',
-    backgroundColor: 'white',
-    overflowY: 'auto',
-    padding: '20px',
-    borderRadius: '20px'
-};
-
-
-const selectedStyle = {
-    backgroundColor: 'lightblue'
-};
-

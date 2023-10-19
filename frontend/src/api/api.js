@@ -135,10 +135,10 @@ export const removeFriend = (token, username) => {
 // =============================
 
 
-export const startNewTrip = (token, isEdugaming, fitnessLevel) => {
+export const startNewTrip = (token, isEdugaming, level) => {
     return axios.post(START_NEW_TRIP_URL, {
         isEdugaming: isEdugaming,
-        fitnessLevel: fitnessLevel
+        level: level
     }, {
         headers: { authorization: `Bearer ${token}`, "ngrok-skip-browser-warning": true }
     });

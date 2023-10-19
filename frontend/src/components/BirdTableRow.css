@@ -1,0 +1,30 @@
+.clickable-cell {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.clickable-cell p {
+  margin-right: 10px;
+}
+
+.request-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 4px 1px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: 15px;
+}
+
+.request-button:hover {
+  background-color: #0056b3;
+}
+
+.map-icon {
+  font-size: 35px;  
+  cursor: pointer;
+}
+

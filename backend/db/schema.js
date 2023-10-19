@@ -27,7 +27,7 @@ const userSchema = new Schema({
 const distanceGoalSchema = new mongoose.Schema({
 	distance: { type: Number, required: true },  // in meters
 	duration: { type: Number, required: true },  // in minutes
-	level: { type: Number, enum: [1, 2, 3], required: true },
+	level: { type: Number, enum: [1, 2, 3, 4, 5, 6, 7, 8], required: true },
 	status: { type: String, enum: ['inProgress', 'success', 'failed'], default: 'inProgress' },
 	startDate: { type: Date, default: Date.now },
 	endDate: { type: Date },
@@ -59,7 +59,7 @@ const tripSchema = new Schema({
 	}],
 	isActive: { type: Boolean, default: true },
 	isEdugaming: { type: Boolean, required: true },
-	fitnessLevel: { type: String, enum: ['low', 'mid', 'high'], required: true },
+	level: { type: Number, enum: [1, 2, 3, 4, 5, 6, 7, 8], required: true },
 	distanceGoal: distanceGoalSchema,
 	birdCountGoals: [BirdCountGoalSchema],
 	suspiciousLocation: { type: Boolean, default: false },
@@ -111,6 +111,11 @@ const birdSchema = new Schema({
 	scientificName: { type: String },
 	otherNames: [{ type: String }],
 	conservationStatus: { type: String },
+	weight: { type: String },
+	length: { type: String },
+	food: { type: String },
+	habitat: { type: String },
+	description: { type: String },
 	rarity: { type: Number, required: true },
 	images: [{ type: String }],
 	questions: [questionSchema]

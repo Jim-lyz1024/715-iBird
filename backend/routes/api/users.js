@@ -21,7 +21,7 @@ router.post("/create", async (req, res) => {
 
     // duplicate usernames not allowed
     let user = await User.findOne({ username });
-    if (user) return res.sendStatus(409);
+    if (user) return res.status(409).send("Username already exists");
 
     // create user
     user = await User.create({
@@ -64,7 +64,7 @@ router.get("/getUsernameFromToken", verifyToken, async (req, res) => {
 router.get("/", verifyToken, async (req, res) => {
     try {
         // use projection to only return username, not password
-        const users = await User.find({}, 'username');
+        const users = await User.find({}, 'username kiwiStage');
         return res.json(users);
     } catch (err) {
         console.error(err);
